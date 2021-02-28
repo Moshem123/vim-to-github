@@ -58,9 +58,16 @@ function! s:copy_to_clipboard(url)
   endif
 endfunction
 
+function s:find_git_name() abort
+   let git_name = s:run('git remote -v | gsed -E "s?origin\s*(git@|https://)(\w+).*?\2?g" | head -1')
+   return git_name
+endfunction
+
 function! ToGithub(count, line1, line2, ...)
-  let github_url = 'https://github.com'
-  let get_remote = 'git remote -v | grep -E "github\.com.*\(fetch\)" | head -n 1'
+  let git_name = s:find_git_name()
+  echom git_name
+  let github_url = 'https://' . git_name . '.com'
+  let get_remote = 'git remote -v | grep -E "' . git_name . '\.com.*\(fetch\)" | head -n 1'
   let get_username = 'sed -E "s/.*com[:\/](.*)\/.*/\\1/"'
   let get_repo = 'sed -E "s/.*com[:\/].*\/(.*).*/\\1/" | cut -d " " -f 1'
   let optional_ext = 'sed -E "s/\.git//"'
@@ -90,7 +97,7 @@ function! ToGithub(count, line1, line2, ...)
   if a:count == -1
     let line = '#L' . line('.')
   else
-    let line = '#L' . a:line1 . '-L' . a:line2
+    let line = '#L' . a:line1 . '-' . (git_name == 'github' ? 'L' : '') . a:line2
   endif
 
   if get(g:, 'to_github_clipboard', 0)
@@ -101,3 +108,4 @@ function! ToGithub(count, line1, line2, ...)
 endfunction
 
 command! -nargs=* -range ToGithub :call ToGithub(<count>, <line1>, <line2>, <f-args>)
+
