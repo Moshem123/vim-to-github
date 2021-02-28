@@ -65,7 +65,6 @@ endfunction
 
 function! ToGithub(count, line1, line2, ...)
   let git_name = s:find_git_name()
-  echom git_name
   let github_url = 'https://' . git_name . '.com'
   let get_remote = 'git remote -v | grep -E "' . git_name . '\.com.*\(fetch\)" | head -n 1'
   let get_username = 'sed -E "s/.*com[:\/](.*)\/.*/\\1/"'
